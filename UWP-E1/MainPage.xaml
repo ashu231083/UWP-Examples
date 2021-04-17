@@ -9,6 +9,25 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
+            <CommandBar>
+                <CommandBar.Content>
+                    <Button x:Name="BackButton"
+                        Style="{StaticResource NavigationBackButtonNormalStyle}"
+                        IsEnabled="{x:Bind Frame.CanGoBack, Mode=OneWay}" 
+                        ToolTipService.ToolTip="Back" 
+                        VerticalAlignment="Top" Click="BackButton_Click"/>
+                </CommandBar.Content>
+                
+                <AppBarButton Icon="Forward" Label="Forward" Click="AppBarButton_Click"/>
+                <AppBarButton Icon="Delete" Label="Delete"/>
+                <AppBarButton Icon="Save" Label="Save"/>
+            </CommandBar>
+        </Grid>
     </Grid>
 </Page>

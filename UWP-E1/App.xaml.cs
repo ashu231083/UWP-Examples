@@ -7,6 +7,8 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.System;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -50,6 +52,19 @@ namespace UWP_E1
 
                 rootFrame.NavigationFailed += OnNavigationFailed;
 
+                // Add support for accelerator keys. 
+                // Listen to the window directly so the app responds
+                // to accelerator keys regardless of which element has focus.
+                Window.Current.CoreWindow.Dispatcher.AcceleratorKeyActivated +=
+                    CoreDispatcher_AcceleratorKeyActivated;
+
+                // Add support for system back requests. 
+                SystemNavigationManager.GetForCurrentView().BackRequested
+                    += System_BackRequested;
+
+                // Add support for mouse navigation buttons. 
+                Window.Current.CoreWindow.PointerPressed += CoreWindow_PointerPressed;
+
                 if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {
                     //TODO: Load state from previously suspended application
@@ -66,7 +81,7 @@ namespace UWP_E1
                     // When the navigation stack isn't restored navigate to the first page,
                     // configuring the new page by passing required information as a navigation
                     // parameter
-                    rootFrame.Navigate(typeof(Page1), e.Arguments);
+                    rootFrame.Navigate(typeof(MainPage), e.Arguments);
                 }
                 // Ensure the current window is active
                 Window.Current.Activate();
@@ -95,6 +110,97 @@ namespace UWP_E1
             var deferral = e.SuspendingOperation.GetDeferral();
             //TODO: Save application state and stop any background activity
             deferral.Complete();
+        }
+
+        /// <summary>
+        /// Back button handler
+        /// </summary>
+        public static bool TryGoBack()
+        {
+            Frame rootFrame = Window.Current.Content as Frame;
+            if (rootFrame.CanGoBack)
+            {
+                rootFrame.GoBack();
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Add this code after the TryGoBack method added previously.
+        /// Perform forward navigation if possible.
+        /// </summary>
+        /// <returns></returns>
+
+        private bool TryGoForward()
+        {
+            Frame rootFrame = Window.Current.Content as Frame;
+            if (rootFrame.CanGoForward)
+            {
+                rootFrame.GoForward();
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Invoked on every keystroke, including system keys such as Alt key combinations.
+        /// Used to detect keyboard navigation between pages even when the page itself
+        /// doesn't have focus.  
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+
+        private void CoreDispatcher_AcceleratorKeyActivated(CoreDispatcher sender, AcceleratorKeyEventArgs e)
+        {
+            // When Alt+Left are pressed navigate back.
+            // When Alt+Right are pressed navigate forward.
+            if (e.EventType == CoreAcceleratorKeyEventType.SystemKeyDown
+                && (e.VirtualKey == VirtualKey.Left || e.VirtualKey == VirtualKey.Right)
+                && e.KeyStatus.IsMenuKeyDown == true
+                && !e.Handled)
+            {
+                if (e.VirtualKey == VirtualKey.Left)
+                {
+                    e.Handled = TryGoBack();
+                }
+                else if (e.VirtualKey == VirtualKey.Right)
+                {
+                    e.Handled = TryGoForward();
+                }
+            }
+        }
+        /// <summary>
+        /// Handle system back requests.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+
+        private void System_BackRequested(object sender, BackRequestedEventArgs e)
+        {
+            if (!e.Handled)
+            {
+                e.Handled = TryGoBack();
+            }
+        }
+        /// <summary>
+        /// Handle mouse back button.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CoreWindow_PointerPressed(CoreWindow sender, PointerEventArgs e)
+        {
+            // For this event, e.Handled arrives as 'true', so invert the value.
+            if (e.CurrentPoint.Properties.IsXButton1Pressed
+                && e.Handled)
+            {
+                e.Handled = !TryGoBack();
+            }
+            else if (e.CurrentPoint.Properties.IsXButton2Pressed
+                    && e.Handled)
+            {
+                e.Handled = !TryGoForward();
+            }
         }
     }
 }

@@ -26,5 +26,15 @@ namespace UWP_E1
         {
             this.InitializeComponent();
         }
+
+        private void BackButton_Click(object sender, RoutedEventArgs e)
+        {
+            App.TryGoBack();
+        }
+
+        private void AppBarButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Frame.Navigate(typeof(Page1));
+        }
     }
 }
