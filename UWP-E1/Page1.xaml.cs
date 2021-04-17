@@ -29,7 +29,7 @@ namespace UWP_E1
 
         private void HyperlinkButton_Click(object sender, RoutedEventArgs e)
         {
-            this.Frame.Navigate(typeof(Page2));
+            this.Frame.Navigate(typeof(Page2),name.Text);
         }
     }
 }

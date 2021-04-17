@@ -26,7 +26,18 @@ namespace UWP_E1
         {
             this.InitializeComponent();
         }
-
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            if (e.Parameter is string && !string.IsNullOrWhiteSpace((string)e.Parameter))
+            {
+                greeting.Text = $"Hi, {e.Parameter.ToString()}";
+            }
+            else
+            {
+                greeting.Text = "Hi!";
+            }
+            base.OnNavigatedTo(e);
+        }
         private void HyperlinkButton_Click(object sender, RoutedEventArgs e)
         {
             this.Frame.Navigate(typeof(Page1));
